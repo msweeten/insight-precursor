@@ -1,7 +1,4 @@
-def load_data_csv():
-    """If no database, creates PostgreSQL database from csv
-    """
-    pass
+import ConfigParser
 
 def load_data_sql():
     """Loads data from SQL into appropriate network format
