@@ -1,5 +1,7 @@
 import pandas as pd
 import psycopg2
+from sqlalchemy import create_engine
+from sqlalchemy_utils import database_exists, create_database
 
 def load_data_sql():
     """Loads data from SQL
