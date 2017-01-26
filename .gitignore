@@ -9,3 +9,6 @@ Config.ini
 
 #Any datafiles
 *.csv
+*.arff
+*.rn
+
