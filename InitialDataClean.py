@@ -72,9 +72,6 @@ def create_network(con, engine):
         for e in edges:
             edge_list = list(e) + [1]
             network.append(edge_list, ignore_index = True)
-
-    network['Node A'] = 'Node' + network['Node A'].astype(str)
-    network['Node B'] = 'Node' + network['Node B'].astype(str)    
     network.to_sql('network', engine, if_exists='replace')
 
 def network_metadata(con, engine):

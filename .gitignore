@@ -14,3 +14,7 @@ netkit.py
 *.arff
 *.rn
 NetworkAnalysis.py
+netkit-srl-1.4.0/
+nano.save
+Config.cfg
+
