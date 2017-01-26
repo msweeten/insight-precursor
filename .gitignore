@@ -6,6 +6,7 @@ Config.ini
 
 #Distribution / packages
 .Python
+netkit.py
 
 #Any datafiles
 *.csv
