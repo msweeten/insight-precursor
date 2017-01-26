@@ -66,7 +66,7 @@ def create_network(con, engine):
     albums = list(set(dataset['album_uri'].values))
     for a in albums:
         album_sub = dataset[dataset['album_uri'] == a]
-        nodes = list(set(album_sub['nodes'].values))
+        nodes = list(set(album_sub['node'].values))
         nodes.sort()
         edges = list(itertools.combinations(nodes, 2))
         for e in edges:
@@ -82,10 +82,13 @@ def network_metadata(con, engine):
     """
     query = 'SELECT * FROM classical_song_nodes;'
     node_data = pd.read_sql_query(query, con)
+    print('Node List')
     nodes = list(set(node_data))
     node_set = pd.DataFrame(columns = ('Node', 'Known', 'Genre'))
+    print('Starting...')
     for n in nodes:
-        subset = node_data[node_data['nodes'] == n]
+        print(n + ' of ' + str(len(nodes)) + ' nodes')
+        subset = node_data[node_data['node'] == n]
         if any(subset['set_type'] == 'training'):
             training_vote = subset[subset['set_type'] == 'training']
             #could have multiple modes
