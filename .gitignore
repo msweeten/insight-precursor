@@ -1,0 +1,11 @@
+#pycache
+__pycache__/
+
+#Config files
+Config.ini
+
+#Distribution / packages
+.Python
+
+#Any datafiles
+*.csv
