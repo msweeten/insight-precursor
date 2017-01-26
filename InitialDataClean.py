@@ -83,11 +83,12 @@ def network_metadata(con, engine):
     query = 'SELECT * FROM classical_song_nodes;'
     node_data = pd.read_sql_query(query, con)
     print('Node List')
-    nodes = list(set(node_data))
+    nodes = list(set(node_data['node']))
     node_set = pd.DataFrame(columns = ('Node', 'Known', 'Genre'))
     print('Starting...')
-    for n in nodes:
-        print(n + ' of ' + str(len(nodes)) + ' nodes')
+    for i in range(len(nodes)):
+        n = nodes[i]
+        print('Node ' + str(i) + ' of ' + str(len(nodes)) + ' nodes')
         subset = node_data[node_data['node'] == n]
         if any(subset['set_type'] == 'training'):
             training_vote = subset[subset['set_type'] == 'training']
