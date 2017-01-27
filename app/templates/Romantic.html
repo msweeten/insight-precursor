@@ -46,9 +46,9 @@
           </div>
           <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-              <li class="active"><a href="/">Home</a></li>
-              <li><a href="/About">About</a></li>
-              <li><a href="/Contact">Contact</a></li>
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="/about">About</a></li>
+              <li><a href="/contact">Contact</a></li>
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Medieval/Renaissance <span class="caret"></span></a>
                 <ul class="dropdown-menu">
@@ -78,6 +78,22 @@
         </div>
       </nav>
 </div><!-- /.container -->
+<div class="jumbotron">
+        <h1>Romantic Period</h1>
+</div><!-- /.container -->
+<div class="container">
+      <div class="starter-template">
+        <h3>Results:</h3>
+      </div>
+      <table class="table table-hover">
+      <tr><th>index</th><th>Song Name</th><th>Artist</th><th>Album</th></tr>
+      {% for song in songs %}
+      <tr><td>{{ song['index'] }}</td><td>{{ song['song_name']}}</td><td> {{ song['artists_name'] }}</td><td>{{ song['album_name'] }}</td></tr>
+      {% endfor %}
+      </table>
+      <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+      <script src="static/js/bootstrap.min.js"></script>       
+  </div><!-- /.container -->
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->

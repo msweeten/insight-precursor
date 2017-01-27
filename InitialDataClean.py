@@ -2,13 +2,14 @@ import pandas as pd
 import psycopg2
 from sqlalchemy import create_engine
 import itertools
+from collections import Counter
 
 def load_data_sql():
     """Loads data from SQL
     """
     cfg = open('Config.cfg').read()
     split = cfg.split('\n')
-    dbname = 'classical_db'
+    dbname = 'classic_db'
     username = split[2]
     pswd = split[3]
     con = None
@@ -47,7 +48,7 @@ def match_songs(con, engine):
                     song_data.set_value(row, 'node', node_iter)
                     node_iter += 1
 
-        song_data.to_sql('classical_song_nodes', engine, if_exists = 'replace')
+        song_data.to_sql('classical_song_nodes', engine, if_exists = 'replace', index = False)
             
         #if artist_uri match, if song_name match
     elif 'node' in list(data.columns) and any(data['node'].isnull()):
@@ -60,19 +61,23 @@ def match_songs(con, engine):
 def create_network(con, engine):
     """Create the network and places into SQL table in classical_db
     """
-    network = pd.DataFrame(columns = ('Node A', 'Node B', 'Weight'))
+    net = pd.DataFrame(columns = ('Node A', 'Node B', 'Weight'))
     query = 'SELECT * FROM classical_song_nodes;'
     dataset = pd.read_sql_query(query, con)
     albums = list(set(dataset['album_uri'].values))
+    network = []
     for a in albums:
+        print(str(albums.index(a)) + ' out of ' + str(len(albums) - 1))
+        #perhaps link all training data for each subgenre
         album_sub = dataset[dataset['album_uri'] == a]
         nodes = list(set(album_sub['node'].values))
         nodes.sort()
         edges = list(itertools.combinations(nodes, 2))
         for e in edges:
             edge_list = list(e) + [1]
-            network.append(edge_list, ignore_index = True)
-    network.to_sql('network', engine, if_exists='replace')
+            network.append(edge_list)
+    net = pd.DataFrame(network, columns = ('Node A', 'Node B', 'Weight'))            
+    net.to_sql('network', engine, if_exists='replace', index = False)
 
 def network_metadata(con, engine):
     """Takes node data and assigns a label to training data
@@ -81,30 +86,37 @@ def network_metadata(con, engine):
     node_data = pd.read_sql_query(query, con)
     print('Node List')
     nodes = list(set(node_data['node']))
-    node_set = pd.DataFrame(columns = ('Node', 'Known', 'Genre'))
+    node_set = []
     print('Starting...')
     for i in range(len(nodes)):
         n = nodes[i]
-        print('Node ' + str(i) + ' of ' + str(len(nodes)) + ' nodes')
+        print('Node ' + str(i) + ' of ' + str(len(nodes)) + ' nodes') 
         subset = node_data[node_data['node'] == n]
         if any(subset['set_type'] == 'training'):
-            training_vote = subset[subset['set_type'] == 'training']
+            if len(subset) == 1:
+                training_vote = subset
+            else:
+                training_vote = subset[subset['set_type'] == 'training']
             #could have multiple modes
             known = 1
         else:
-            training_vote = subset[subset['set_type']]
+            training_vote = subset
             known = 0
-        mode = training_vote['genre'].mode()
-        if len(mode) > 1:
-            mode = mode[0]
+        if len(training_vote) == 1:
+            mode = training_vote['genre'].values[0]
+        else:
+            mode = Counter(list(training_vote['genre'].values))
+            mode = mode.most_common(1)
+            mode = list(mode[0])[0]
         node_set.append([n, known, mode])
-    node.to_sql('node_data', engine, if_exists='replace')
+    nset = pd.DataFrame(node_set, columns = ('Node', 'Known', 'Genre'))        
+    nset.to_sql('node_data', engine, if_exists='replace', index = False)
     
 if __name__ == '__main__':
     con, engine = load_data_sql()
     print('Start Matches')
     #match_songs(con, engine)
     print('Create Network DB')
-    create_network(con,engine)
+    #create_network(con,engine)
     network_metadata(con,engine)
 

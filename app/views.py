@@ -1,5 +1,4 @@
 from flask import render_template
-from flask import request
 from app import app
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
@@ -9,7 +8,7 @@ from .a_model import ModelIt
 
 cfg = open('/home/msweeten/insight-precursor/Config.cfg').read()
 split = cfg.split('\n')
-dbname = 'birth_db'
+dbname = 'classic_db'
 username = split[2]
 pswd = split[3]
 con = None
@@ -18,39 +17,139 @@ engine = create_engine('postgresql://%s:%s@localhost/%s'%(username,pswd,dbname))
 
 #start with this
 @app.route('/')
-def start_page():
-   
+def home():
+   return(render_template('home.html'))
+@app.route('/About')
+def about():
+   sql_query = """
+               SELECT song_name, artists_name, album_name FROM classical_songs LIMIT 50;
+               """
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))
+   return(render_template('about.html', songs = songs))
+@app.route('/Contact')
+def contact():
    return(render_template('home.html'))
 
 
-@app.route('/db_fancy')
-def cesareans_page_fancy():
-    sql_query = """
-               SELECT index, attendant, birth_month FROM birth_data_table WHERE delivery_method='Cesarean';
-                """
-    query_results=pd.read_sql_query(sql_query,con)
-    births = []
-    for i in range(0,query_results.shape[0]):
-        births.append(dict(index=query_results.iloc[i]['index'], attendant=query_results.iloc[i]['attendant'], birth_month=query_results.iloc[i]['birth_month']))
-    return render_template('starter.html',births=births)
+def start_page():
+   return(render_template('home.html'))
+@app.route('/Avant-Garde')
+def avant():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Avant-Garde.Community, Avant-Garde.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Avant-Garde.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))
+            
+   return(render_template('Avant-Garde.html', songs = songs))
+@app.route('/Baroque')
+def baroque():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Baroque.Community, Baroque.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Baroque.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """
 
-@app.route('/input')
-def cesareans_input():
-    return render_template("input.html")
-@app.route('/output')
-def cesareans_output():
-   #pull 'birth_month' from input field and store it
-   patient = request.args.get('birth_month')
-   #just select the Cesareans  from the birth dtabase for the month that the user inputs
-   query = "SELECT index, attendant, birth_month FROM birth_data_table WHERE delivery_method='Cesarean' AND birth_month='%s'" % patient
-   print(query)
-   query_results=pd.read_sql_query(query,con)
-   print(query_results)
-   births = []
-   for i in range(0,query_results.shape[0]):
-      births.append(dict(index=query_results.iloc[i]['index'], attendant=query_results.iloc[i]['attendant'], birth_month=query_results.iloc[i]['birth_month']))
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))
+            
+   return(render_template('Baroque.html', songs = songs))
+@app.route('/Chant')
+def chant():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Chant.Community, Chant.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Chant.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """   
 
-   the_result = ModelIt(patient,births)
-   return(render_template("output.html", births = births, the_result = the_result))
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))
+            
+   return(render_template('Chant.html', songs = songs))
+@app.route('/Choral')
+def choral():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Choral.Community, Choral.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Choral.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """   
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))
+   return(render_template('Choral.html', songs = songs))
+@app.route('/Early+Music')
+def early():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Early_Music.Community, Early_Music.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Early_Music.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """   
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))
+   return(render_template('EarlyMusic.html', songs = songs))
+@app.route('/Classical+Period')
+def classical():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Classical_Period.Community, Classical_Period.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Classical_Period.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """   
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))
+   return(render_template('ClassicalPeriod.html', songs = songs))
 
+@app.route('/Minimal')
+def minimal():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Minimal.Community, Minimal.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Minimal.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """   
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))    
+   return(render_template('Minimal.html', songs = songs))
+@app.route('/Opera')
+def opera():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Minimal.Community, Minimal.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Minimal.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """   
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))   
+   return(render_template('Opera.html', songs = songs))
+@app.route('/Orchestral')
+def orchestral():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Orchestral.Community, Orchestral.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Orchestral.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """   
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))
+   return(render_template('Orchestral.html', songs = songs))
+@app.route('/Renaissance')
+def renaissance():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Renaissance.Community, Renaissance.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Renaissance.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """   
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))   
+   return(render_template('Renaissance.html', songs = songs))
+@app.route('/Romantic')
+def romantic():
+   sql_query = """
+               SELECT classical_song_nodes.song_name, classical_song_nodes.artists_name, classical_song_nodes.album_name, Romantic.Community, Romantic.Label1 FROM classical_song_nodes ON classical_song_nodes.node = Romantic.Node, ORDER BY classical_song_nodes.popularity DESC;
+               """   
 
+   query_results = pd.read_sql_query(sql_query, con)
+   songs = []
+   for i in range(min(len(query_results), 50)):
+      songs.append(dict(index=str(i), song_name=query_results.iloc[i]['song_name'], artists_name=query_results.iloc[i]['artists_name'], album_name=query_results.iloc[i]['album_name']))   
+   return(render_template('Romantic.html', songs = songs))

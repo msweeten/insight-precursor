@@ -5,3 +5,23 @@ body {
   padding: 40px 15px;
   text-align: center;
 }
+
+.btn-primary {
+    background-image: linear-gradient(to bottom,#777 0,#265a88 100%);
+    background-repeat: repeat-x;
+    border-color: #f0ad4e;
+}
+
+.jumbotron .h1, .jumbotron h1 {
+    font-size: 63px;
+}
+.jumbotron .h1, .jumbotron h1 {
+    color: inherit;
+}
+.h1, h1 {
+    font-size: 36px;
+}
+.h1, .h2, .h3, h1, h2, h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}

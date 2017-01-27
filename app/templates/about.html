@@ -78,6 +78,24 @@
         </div>
       </nav>
 </div><!-- /.container -->
+<div class="jumbotron">
+        <h1>Test Page</h1>
+</div><!-- /.container -->
+<div class="container">
+      <div class="starter-template">
+        <h3>Results:</h3>
+      </div>
+      <table class="table table-hover">
+      <tr><th>index</th><th>Song Name</th><th>Artist</th><th>Album</th></tr>
+      {% for song in songs %}
+      <tr><td>{{ song['index'] }} </td><td>{{ song['song_name'] }}</td><td> {{ song['artists_name'] }}</td><td>{{ song['album_name'] }}</td></tr>
+      {% endfor %}
+      </table>
+
+      <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+      <script src="static/js/bootstrap.min.js"></script> 
+     </div><!-- /.container -->
+
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
