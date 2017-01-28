@@ -19,5 +19,7 @@ nano.save
 Config.cfg
 
 Transform_csv.py
+spotipy_links.py
+
 communities.pickle
 network.pickle
