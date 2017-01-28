@@ -19,3 +19,5 @@ nano.save
 Config.cfg
 
 Transform_csv.py
+communities.pickle
+network.pickle
