@@ -76,8 +76,22 @@ def create_network(con, engine):
         for e in edges:
             edge_list = list(e) + [1]
             network.append(edge_list)
+    genres = ['Avant-Garde', 'Baroque', 'Chant',
+                  'Choral',
+                  'Early Music', 'Classical Period',
+                  'Minimal', 'Opera',
+                  'Orchestral', 'Renaissance',
+                  'Romantic']
+    for g in genres:
+        album_gen = dataset[(dataset['set_type'] == 'training') & (dataset['genre'] == g)]
+        nodes = list(set(album_sub['node'].values))
+        nodes.sort()
+        edges = list(itertools.combinations(nodes, 2))
+        for e in edges:
+            edge_list = list(e) + [1]
+            network.append(edge_list)
     net = pd.DataFrame(network, columns = ('Node A', 'Node B', 'Weight'))            
-    net.to_sql('network', engine, if_exists='replace', index = False)
+    net.to_sql('network2', engine, if_exists='replace', index = False)
 
 def network_metadata(con, engine):
     """Takes node data and assigns a label to training data
@@ -117,6 +131,6 @@ if __name__ == '__main__':
     print('Start Matches')
     #match_songs(con, engine)
     print('Create Network DB')
-    #create_network(con,engine)
+    create_network(con,engine)
     network_metadata(con,engine)
 
