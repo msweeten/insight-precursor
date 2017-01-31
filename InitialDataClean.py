@@ -9,7 +9,7 @@ def load_data_sql():
     """
     cfg = open('Config.cfg').read()
     split = cfg.split('\n')
-    dbname = 'classic_db'
+    dbname = 'classic_limited'
     username = split[2]
     pswd = split[3]
     con = None
@@ -48,7 +48,7 @@ def match_songs(con, engine):
                     song_data.set_value(row, 'node', node_iter)
                     node_iter += 1
 
-        song_data.to_sql('classical_song_nodes', engine, if_exists = 'replace', index = False)
+        song_data.to_sql('classical_song_nodes2', engine, if_exists = 'replace', index = False)
             
         #if artist_uri match, if song_name match
     elif 'node' in list(data.columns) and any(data['node'].isnull()):
@@ -62,7 +62,7 @@ def create_network(con, engine):
     """Create the network and places into SQL table in classical_db
     """
     net = pd.DataFrame(columns = ('Node A', 'Node B', 'Weight'))
-    query = 'SELECT * FROM classical_song_nodes;'
+    query = 'SELECT * FROM classical_song_nodes2;'
     dataset = pd.read_sql_query(query, con)
     albums = list(set(dataset['album_uri'].values))
     network = []
@@ -82,21 +82,23 @@ def create_network(con, engine):
                   'Minimal', 'Opera',
                   'Orchestral', 'Renaissance',
                   'Romantic']
-    for g in genres:
-        album_gen = dataset[(dataset['set_type'] == 'training') & (dataset['genre'] == g)]
-        nodes = list(set(album_sub['node'].values))
-        nodes.sort()
-        edges = list(itertools.combinations(nodes, 2))
-        for e in edges:
-            edge_list = list(e) + [1]
-            network.append(edge_list)
-    net = pd.DataFrame(network, columns = ('Node A', 'Node B', 'Weight'))            
-    net.to_sql('network2', engine, if_exists='replace', index = False)
+    print('Put in SQL')
+    create_table = "CREATE TABLE network_broad (NodeA INT, NodeB INT, Weight INT);"
 
+    cur = con.cursor()
+    cur.execute(create_table)
+    iter_num = 0
+    for n in network:
+        print('Iteration ' + str(iter_num) + ' out of ' + str(len(network) - 1))
+        insert_data = "INSERT INTO network_broad (NodeA, NodeB, Weight) VALUES (%s, %s, %s);"
+        tuple_n = (int(n[0]), int(n[1]), int(n[2]))
+        cur.execute(insert_data, tuple_n)
+        iter_num += 1
+    cur.commit()
 def network_metadata(con, engine):
     """Takes node data and assigns a label to training data
     """
-    query = 'SELECT * FROM classical_song_nodes;'
+    query = 'SELECT * FROM classical_song_nodes2;'
     node_data = pd.read_sql_query(query, con)
     print('Node List')
     nodes = list(set(node_data['node']))
@@ -124,7 +126,7 @@ def network_metadata(con, engine):
             mode = list(mode[0])[0]
         node_set.append([n, known, mode])
     nset = pd.DataFrame(node_set, columns = ('Node', 'Known', 'Genre'))        
-    nset.to_sql('node_data', engine, if_exists='replace', index = False)
+    nset.to_sql('node_data2', engine, if_exists='replace', index = False)
     
 if __name__ == '__main__':
     con, engine = load_data_sql()

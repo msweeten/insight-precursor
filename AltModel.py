@@ -4,6 +4,7 @@ import psycopg2
 import pandas as pd
 from sqlalchemy import create_engine
 import pickle
+import os.path
 
 def load_network_db():
     """Opens network file from SQL database
@@ -23,7 +24,7 @@ def load_network_db():
     
     genres = list(set(db_genre['Genre'].values))
     engine = create_engine('postgresql://%s:%s@localhost/%s'%(username,pswd,dbname))
-    return(db, genres, con, engine)
+    return db, genres, con, engine
 def create_network(db):
     """Creates a network using Networkx
     """
@@ -36,16 +37,23 @@ def create_network(db):
         network.add_vertex('node' + str(n))
 
     subset = db[['Node A', 'Node B']]
+    edges = []
+    edge_weights = []
     for i in range(len(subset)):
         edge = list(subset.iloc[i].values)
-        print edge
-        network.add_edge('node' + str(edge[0]), 'node' + str(edge[1]))
+        print 'Edge ' + str(i) + ' out of ' + str(len(subset) - 1)
+        edges.append(('node' + str(edge[0]), 'node' + str(edge[1])))
+        edge_weights.append(edge[2])
+        #network.add_edge('node' + str(edge[0]), 'node' + str(edge[1]))
+    network.add_edges(edges)
     #pickle network
-    with open('network.pickle', 'rb') as f:
+    with open('networkdb2.pickle', 'wb') as f:
         pickle.dump(network, f)
-    return network
+    with open('edge_weights.pickle', 'wb') as f:
+        pickle.dump(edge_weights)
+    return network, edge_weights
 
-def describe_communities(network, con):
+def describe_communities(network, edge_weights, con):
     """Runs Infomap through iGraph
     Weights Vertices according to number of songs in node
     Identifies communities and labels them according
@@ -57,31 +65,26 @@ def describe_communities(network, con):
     verts = pd.read_sql_query(query, con)
     verts = list(verts['node'].values)
     vert_set = list(set(verts))
-    weights = []
-    count = Counter(verts)
-    for v in vert_set:
-        node_length = count[v]
-        weights.append(node_length)
-    info_map = network.community_infomap()
-    info_map50 = network.community_infomap(weights, trials = 50)
-    with open('communities.pickle', 'rb') as f:
-        pickle.dump(infomap50, f)
-    return(info_map, info_map50)
+    info_map = network.community_infomap(edge_weights = edge_weights)
+    #info_map50 = network.community_infomap(weights, trials = 50)
+    with open('communitiesdb2.pickle', 'wb') as f:
+        pickle.dump(info_map, f)
+    return info_map
             
 if __name__ == '__main__':
     print('Starting...')
     dataset, genres, con, engine = load_network_db()
     print('Creating Graph Object')
-    net = create_network(dataset)
+    if os.path.isfile('networkdb2.pickle'):
+        with open('networkdb2.pickle') as f:
+            net, edge_weights = pickle.load(f)
+    else:
+        net, edge_weights = create_network(dataset)
     print('Running Model')
-    model, model50 = describe_communities(net, con)
-    with open('Example.txt', 'w') as txt:
+    model= describe_communities(net, edge_weights, con)
+    
+    with open('Exampledb2.txt', 'w') as txt:
         txt.write(str(model))
-    with open('Example50.txt', 'w') as txt:
-        txt.write(str(model50))
-    layout = net.layout('kk')
-    plot(net, "song_network.pdf", layout)
-
 
     #print('Assign Labels')
     #assign_labels(model, genres, con, engine)

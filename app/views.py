@@ -8,7 +8,7 @@ from .a_model import ModelIt
 
 cfg = open('/home/msweeten/insight-precursor/Config.cfg').read()
 split = cfg.split('\n')
-dbname = 'classic_db'
+dbname = 'classic_limited'
 username = split[2]
 pswd = split[3]
 con = None
