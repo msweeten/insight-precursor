@@ -1,12 +1,3 @@
-#number of flipped genres
-#plurality
-#majority rule
-
-#diagram for work
-#took song, artist, album, genre features
-#x = genres
-#y = segmented bar plot (stayed the same genre, switched genre to another, was unclassifiable)
-
 import pandas as pd
 import numpy as np
 import psycopg2
@@ -88,65 +79,87 @@ def plot_maj_rule(db):
             if v == 4:
                 print(count)
 
-            gb.set_value(i, gb.columns[v], count)
+            gb.set_value(i, gb.columns[v], count*100)
     
     fig, ax1 = plt.subplots(1, figsize = (10, len(genres)))
     
     bar_width = 0.75
     #10th of network
 
+    gb = gb.sort_values(by = 'Switch_test', ascending = 0)
     bar_l = [i+1 for i in range(len(gb['Same_test']))]
     tick_pos = [i+(bar_width/2) for i in bar_l] 
     ax1.bar(bar_l, 
         # using the pre_score data
-        gb['Same_test'],
+        gb['Switch_test'],
         # set the width
         width=bar_width,
         # with the label pre score
-        label='Same Genre (Unlabeled)', 
+        label='Switch from Spotify (Unlabeled)',
         # with alpha 0.5
         alpha=0.5, 
         # with color
-        color='#F4561D')
-
+        color='#F1BD1A')
+    plt.xticks(tick_pos, gb['Genre'])
+    ax1.set_ylabel('Percentage of Subgenre')
+    ax1.set_ylim([0, 100])
+    ax1.set_xlabel('Subgenre')
+    #plt.legend(loc='upper center')
+    plt.xlim([min(tick_pos)-bar_width, max(tick_pos)+bar_width])
+    fig.autofmt_xdate()
+    plt.savefig('/home/msweeten/Dropbox/a.png')
     # Create a bar plot, in position bar_1
     ax1.bar(bar_l,
             # using the mid_score data
-            gb['Same_training'],
+            gb['Same_test'],
             # set the width
             width=bar_width,
 
             # with pre_score on the bottom
-            bottom=gb['Same_test'],
+            bottom=gb['Switch_test'],
             # with the label mid score
-            label='True Positives',
+            label='Same as Spotify (Unlabeled)',
+            # with alpha 0.5
+            alpha=0.5,
+            # with color
+            color='#F4561D')
+    plt.xticks(tick_pos, gb['Genre'])
+    ax1.set_ylabel('Percentage of Subgenre')
+    ax1.set_ylim([0, 100])
+    ax1.set_xlabel('Subgenre')
+    #plt.legend(loc='upper center')
+    plt.xlim([min(tick_pos)-bar_width, max(tick_pos)+bar_width])
+    fig.autofmt_xdate()
+    plt.savefig('/home/msweeten/Dropbox/ab.png')
+    # Create a bar plot, in position bar_1
+    ax1.bar(bar_l,
+            # using the post_score data
+            gb['Same_training'],
+            # set the width
+            width=bar_width,
+            # with pre_score and mid_score on the bottom
+            bottom=[i+j for i,j in zip(gb['Switch_test'],gb['Same_test'])],
+            # with the label post score
+            label='Same as Spotify (Pre-Labeled)',
             # with alpha 0.5
             alpha=0.5,
             # with color
             color='#F1911E')
-
-    # Create a bar plot, in position bar_1
-    ax1.bar(bar_l,
-            # using the post_score data
-            gb['Switch_test'],
-            # set the width
-            width=bar_width,
-            # with pre_score and mid_score on the bottom
-            bottom=[i+j for i,j in zip(gb['Same_test'],gb['Same_training'])],
-            # with the label post score
-            label='New (Unlabeled)',
-            # with alpha 0.5
-            alpha=0.5,
-            # with color
-            color='#F1BD1A')
-
+    plt.xticks(tick_pos, gb['Genre'])
+    ax1.set_ylabel('Percentage of Subgenre')
+    ax1.set_ylim([0, 100])
+    ax1.set_xlabel('Subgenre')
+    #plt.legend(loc='upper center')
+    plt.xlim([min(tick_pos)-bar_width, max(tick_pos)+bar_width])
+    fig.autofmt_xdate()
+    plt.savefig('/home/msweeten/Dropbox/abc.png')
     ax1.bar(bar_l,
             # using the post_score data
             gb['Switch_train'],
             # set the width
             width=bar_width,
             # with pre_score and mid_score on the bottom
-            bottom=[i+j+k for i,j,k in zip(gb['Same_test'],gb['Same_training'],gb['Switch_test'])],    
+            bottom=[i+j+k for i,j,k in zip(gb['Switch_test'],gb['Same_test'],gb['Same_training'])],    
             # with the label post score
             label='New (Pre-labeled)',
             # with alpha 0.5
@@ -156,11 +169,12 @@ def plot_maj_rule(db):
     gb.to_csv('/home/msweeten/Dropbox/gb.csv')
     plt.xticks(tick_pos, gb['Genre'])
     ax1.set_ylabel('Percentage of Subgenre')
+    ax1.set_ylim([0, 100])
     ax1.set_xlabel('Subgenre')
     #plt.legend(loc='upper center')
     plt.xlim([min(tick_pos)-bar_width, max(tick_pos)+bar_width])
     fig.autofmt_xdate()
-    plt.savefig('/home/msweeten/Dropbox/bargraph3.png')
+    plt.savefig('/home/msweeten/Dropbox/abcd.png')
 if __name__ == '__main__':
     con, engine = load_data_sql()
     maj_rule, plur_rule = community_databases(con)
